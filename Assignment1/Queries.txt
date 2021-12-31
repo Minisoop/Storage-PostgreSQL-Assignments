@@ -51,6 +51,10 @@ SELECT a.title, b.name
 FROM books AS a
 RIGHT JOIN authors AS b ON a.author_id = b.id;
 
+SELECT a.name, b.title
+FROM authors AS a
+LEFT JOIN books AS b ON a.id = b.author_id;
+
 /* 3 */
 SELECT a.title, b.name, c.rating
 FROM books AS a
@@ -58,14 +62,14 @@ INNER JOIN authors AS b ON a.author_id = b.id
 INNER JOIN reviews AS c ON c.reviewer_id = b.id;
 
 /* 4 */
-SELECT reviewer_id AS author_id, COUNT(*) AS review_count
-FROM reviews
-GROUP BY reviewer_id;
+SELECT author_id, COUNT(*) AS review_count
+FROM books
+GROUP BY author_id;
 
 /* 5 */
-SELECT a.name AS author, COUNT(*) AS review_count
+SELECT a.name AS author, COUNT(*) AS book_count
 FROM authors AS a
-LEFT JOIN reviews AS b ON a.id=b.reviewer_id
+JOIN books AS b ON a.id=b.author_id
 GROUP BY a.id;
 
 /* PART 2 */
