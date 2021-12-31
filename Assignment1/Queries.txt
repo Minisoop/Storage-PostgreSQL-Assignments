@@ -1,0 +1,162 @@
+DROP TABLE IF EXISTS reviews;
+DROP TABLE IF EXISTS books;
+DROP TABLE IF EXISTS authors;
+
+CREATE TABLE authors(
+	id SERIAL PRIMARY KEY,
+	name varchar(50)
+);
+
+INSERT INTO authors (name)
+VALUES ('Richard Bartle');
+INSERT INTO authors (name)
+VALUES ('Ben Cooper');
+INSERT INTO authors (name)
+VALUES ('Jacks Parrow');
+
+CREATE TABLE books(
+	id SERIAL PRIMARY KEY,
+	title varchar(100),
+	author_id INTEGER,
+	FOREIGN KEY (author_id) REFERENCES authors(id)
+);
+
+INSERT INTO books (title, author_id)
+VALUES ('Designing Virtual Worlds', 1);
+INSERT INTO books (title, author_id)
+VALUES ('Sailin the Seven Seas', 3);
+
+CREATE TABLE reviews(
+	id SERIAL PRIMARY KEY,
+	rating INTEGER,
+	reviewer_id INTEGER,
+	book_id INTEGER,
+	FOREIGN KEY (book_id) REFERENCES books(id)
+);
+
+INSERT INTO reviews (rating, reviewer_id, book_id)
+VALUES (80, 1, 1);
+INSERT INTO reviews (rating, reviewer_id, book_id)
+VALUES (60, 2, 2);
+INSERT INTO reviews (rating, reviewer_id, book_id)
+VALUES (75, 2, 1);
+
+/* 1 */
+SELECT a.title, b.name
+FROM books AS a
+INNER JOIN authors AS b ON a.author_id = b.id;
+
+/* 2 */
+SELECT a.title, b.name
+FROM books AS a
+RIGHT JOIN authors AS b ON a.author_id = b.id;
+
+/* 3 */
+SELECT a.title, b.name, c.rating
+FROM books AS a
+INNER JOIN authors AS b ON a.author_id = b.id
+INNER JOIN reviews AS c ON c.reviewer_id = b.id;
+
+/* 4 */
+SELECT reviewer_id AS author_id, COUNT(*) AS review_count
+FROM reviews
+GROUP BY reviewer_id;
+
+/* 5 */
+SELECT a.name AS author, COUNT(*) AS review_count
+FROM authors AS a
+LEFT JOIN reviews AS b ON a.id=b.reviewer_id
+GROUP BY a.id;
+
+/* PART 2 */
+DROP TABLE IF EXISTS phones;
+
+CREATE TABLE phones(
+	name varchar(50),
+	manufacturer varchar(100),
+	price INTEGER,
+	units_sold INTEGER
+);
+
+INSERT INTO phones
+VALUES ('Galaxy A12', 'Samsung', 500, 10000);
+INSERT INTO phones
+VALUES ('Galaxy Fold', 'Samsung', 500, 5000);
+INSERT INTO phones
+VALUES ('iPhone X', 'Apple', 1200, 250000);
+INSERT INTO phones
+VALUES ('iPhone Y', 'Apple', 600, 400000);
+INSERT INTO phones
+VALUES ('iPhone Z', 'Apple', 1800, 1000);
+INSERT INTO phones
+VALUES ('Moto G4', 'Motorola', 160, 7500);
+INSERT INTO phones
+VALUES ('Moto X Play', 'Motorola', 300, 600);
+
+/* 1 */
+SELECT manufacturer, SUM(price*units_sold) AS revenue 
+FROM phones
+GROUP BY manufacturer
+HAVING SUM(price*units_sold) > 2000000;
+
+/* 2 */
+SELECT *
+FROM phones
+ORDER BY price DESC
+LIMIT 2 OFFSET 1;
+
+/* 3 */
+SELECT DISTINCT manufacturer 
+FROM phones 
+WHERE price < 170;
+
+SELECT manufacturer
+FROM phones
+GROUP BY manufacturer
+HAVING COUNT(name) > 2;
+
+SELECT DISTINCT manufacturer 
+FROM phones 
+WHERE price < 170
+UNION
+SELECT DISTINCT manufacturer 
+FROM phones 
+GROUP BY manufacturer
+HAVING COUNT(name) > 2;
+
+/* 4 */
+SELECT name, price,
+price/(SELECT CAST(MAX(price) AS float) 
+	   FROM phones) AS price_ratio
+FROM phones
+ORDER BY price_ratio DESC;
+
+/* 5 */
+SELECT name, price
+FROM phones 
+WHERE units_sold > 5000;
+
+/* 6 */
+SELECT name, manufacturer
+FROM phones 
+WHERE manufacturer IN('Apple', 'Samsung');
+
+/* 7 */
+SELECT name, price*units_sold AS total_revenue
+FROM phones
+WHERE price*units_sold > 1000000;
+
+/* PART 3 */
+SELECT * FROM users;
+SELECT * FROM orders;
+SELECT * FROM products;
+
+/* 1 */
+SELECT COUNT(*) FILTER (WHERE "paid") AS paid,
+	COUNT(*) FILTER (WHERE NOT "paid") AS unpaid
+FROM orders;
+
+/* 2 */
+SELECT a.first_name, a.last_name, b.paid
+FROM users AS a
+RIGHT JOIN orders AS b ON a.id=b.user_id;
